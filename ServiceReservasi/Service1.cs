@@ -138,9 +138,10 @@ namespace ServiceReservasi
         {
 
             string kategori = "";
-            string sql = "select Kategori from Login where Username='" + username + "' and password='" + password + "'";
+            string sql = "select Kategori from Login where Username='" + username + "' and Password='" + password + "'";
             connection = new SqlConnection(constring);
             com = new SqlCommand(sql, connection);
+            connection.Open();
             SqlDataReader reader = com.ExecuteReader();
             while (reader.Read())
             {
