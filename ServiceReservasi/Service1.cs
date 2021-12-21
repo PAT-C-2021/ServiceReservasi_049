@@ -12,7 +12,7 @@ namespace ServiceReservasi
     public class Service1 : IService1
     {
         string constring = "Data Source=LAPTOP-8MKEQ456;Initial Catalog=WCFReservasi;Persist Security Info=True;User ID=sa;Password=mentepermaib20";
-        SqlConnection koneksi;
+        SqlConnection connection;
         SqlCommand com;
 
         public string pemesanan(string IDPemesanan, string NamaCustomer, string NoTelpon, int JumlahPemesanan, string IDLokasi)
@@ -21,18 +21,19 @@ namespace ServiceReservasi
             try
             {
                 string sql = "insert into dbo.Pemesanan values ('" + IDPemesanan + "', '" + NamaCustomer + "', '" + NoTelpon + "', " + JumlahPemesanan + " , '" + IDLokasi + "')";
-                koneksi = new SqlConnection(constring); 
-                com = new SqlCommand(sql, koneksi);
-                koneksi.Open();
+                connection = new SqlConnection(constring); 
+                com = new SqlCommand(sql, connection);
+                connection.Open();
                 com.ExecuteNonQuery();
-                koneksi.Close();
+                connection.Close();
 
                 string sql2 = "update dbo.Lokasi set Kuota = Kuota - " + JumlahPemesanan + "where ID_Lokasi = '" + IDLokasi + "' ";
-                koneksi = new SqlConnection(constring);
-                com = new SqlCommand(sql2, koneksi);
-                koneksi.Open();
+                connection = new SqlConnection(constring);
+                com = new SqlCommand(sql2, connection);
+                connection.Open();
                 com.ExecuteNonQuery();
-                koneksi.Close();
+                connection.Close();
+
                 a = "sukses";
             }
             catch (Exception es)
@@ -48,9 +49,9 @@ namespace ServiceReservasi
             try
             {
                 string sql = "select ID_lokasi, Nama_lokasi, Dekskripsi_full, Kuota from dbo.Lokasi"; //declare query 
-                koneksi = new SqlConnection(constring); // fungsi konek ke database 
-                com = new SqlCommand(sql, koneksi); //proses execute query 
-                koneksi.Open(); //membuka koneksi 
+                connection = new SqlConnection(constring); // fungsi konek ke database 
+                com = new SqlCommand(sql, connection); //proses execute query 
+                connection.Open(); //membuka koneksi 
                 SqlDataReader reader = com.ExecuteReader(); //menampilkan data query 
                 while (reader.Read())
                 {
@@ -62,7 +63,7 @@ namespace ServiceReservasi
                     data.Kuota = reader.GetInt32(3);
                     LokasiFull.Add(data); //mengumpulkan data yang awalnya dari array
                 }
-                koneksi.Close(); //untuk menutup akses ke database
+                connection.Close(); //untuk menutup akses ke database
             }
             catch (Exception ex)
             {
@@ -94,12 +95,12 @@ namespace ServiceReservasi
             try
             {
 
-                string sql = "update dbo.Pemesanan set Nama_Customer = '" +NamaCustomer+ "', No_telpon = '"+No_telpon+ "'" +"where ID_Reservasi = '"+IDPemesanan+"'";
-                koneksi = new SqlConnection(constring);
-                com = new SqlCommand(sql, koneksi);
-                koneksi.Open();
+                string sql = "update dbo.Pemesanan set Nama_customer = '" +NamaCustomer+ "', No_telpon = '"+No_telpon+ "'" +"where ID_reservasi = '"+IDPemesanan+"'";
+                connection = new SqlConnection(constring);
+                com = new SqlCommand(sql, connection);
+                connection.Open();
                 com.ExecuteNonQuery();
-                koneksi.Close();
+                connection.Close();
                 a = "sukses";
             }
             catch (Exception es)
@@ -115,11 +116,11 @@ namespace ServiceReservasi
             try
             {
                 string sql = "delete from dbo.Pemesanan where ID_reservasi = '" + IDPemesanan + "'";
-                koneksi = new SqlConnection(constring); // fungsi konek ke database
-                com = new SqlCommand(sql, koneksi);
-                koneksi.Open();
+                connection = new SqlConnection(constring); // fungsi konek ke database
+                com = new SqlCommand(sql, connection);
+                connection.Open();
                 com.ExecuteNonQuery();
-                koneksi.Close();
+                connection.Close();
                 a = "sukses";
             }
             catch (Exception es)
@@ -133,16 +134,130 @@ namespace ServiceReservasi
             throw new NotImplementedException();
         }
 
+        public string Login(string username, string password)
+        {
+
+            string kategori = "";
+            string sql = "select Kategori from Login where Username='" + username + "' and password='" + password + "'";
+            connection = new SqlConnection(constring);
+            com = new SqlCommand(sql, connection);
+            SqlDataReader reader = com.ExecuteReader();
+            while (reader.Read())
+            {
+                kategori = reader.GetString(0);
+            }
+            return kategori;
+        }
+        public string Register(string username, string password, string kategori)
+        {
+            try
+            {
+                string sql = "insert into Login values('" + username + "', '" + password + "' , '" + kategori + "')";
+                connection = new SqlConnection(constring);
+                com = new SqlCommand(sql, connection);
+                connection.Open();
+                com.ExecuteNonQuery();
+                connection.Close();
+
+                return "Sukses";
+            }
+            catch(Exception e)
+            {
+                return e.ToString();
+            }
+            
+        }
+
+        public string UpdateRegister(string username, string password, string kategori, int id)
+        {
+            try
+            {
+                string sql2 = "update Login SET username='" + username + "', Password= '" + password + "', Kategori='" + kategori + "'where ID_Login = " + id + "";
+                connection = new SqlConnection(constring);
+                com = new SqlCommand(sql2, connection);
+                connection.Open();
+                com.ExecuteNonQuery();
+                connection.Close();
+
+                return "Sukses";
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+
+        }
+
+        public string DeleteRegister(string username)
+        {
+            try
+            {
+                int id = 0;
+                string sql = "select ID_login from dbo.Login where Username = '" + username + "'";
+                connection = new SqlConnection(constring);
+                com = new SqlCommand(sql, connection);
+                connection.Open();
+                SqlDataReader reader = com.ExecuteReader();
+                while (reader.Read())
+                {
+                    id = reader.GetInt32(0);
+                }
+                connection.Close();
+                string sql2 = "delete from Login where ID_login=" + id + "";
+                connection = new SqlConnection(constring);
+                com = new SqlCommand(sql2, connection);
+                connection.Open();
+                com.ExecuteReader();
+                connection.Close();
+
+                return "Sukses";
+            }
+            catch(Exception e)
+            {
+                return e.ToString();
+            }
+        }
+
+        public List<DataRegister> DataRegist()
+        {
+            List<DataRegister> list = new List<DataRegister>();
+            try
+            {
+                string sql = "select ID_Login , Username, Password, Kategori from Login";
+                connection = new SqlConnection(constring);
+                com = new SqlCommand(sql, connection);
+                connection.Open();
+                SqlDataReader reader = com.ExecuteReader();
+                while (reader.Read())
+                {
+                    DataRegister data = new DataRegister();
+                    data.id = reader.GetInt32(0);
+                    data.username = reader.GetString(1);
+                    data.password = reader.GetString(2);
+                    data.kategori = reader.GetString(3);
+                    list.Add(data);
+                }
+                connection.Close();
+            }
+            catch(Exception e)
+            {
+                e.ToString();
+            }
+            return list;
+        }
+
         public List<Pemesanan> Pemesanan()
         {
             List<Pemesanan> pemesanans = new List<Pemesanan>();//declare nama list
             try
             {
-                string sql = " select ID reservasi, Nama_customer, No_telpon," + "Jumlah pemesanan, Nama_Lokasi from dbo.Pemesanan p join dbo.Lokasi 1 on p.ID_lokasi = 1.ID_lokasi";
-                koneksi = new SqlConnection(constring); // fungsi konek ke database 
-                com = new SqlCommand(sql, koneksi); //proses execute query 
-                koneksi.Open(); //membuka koneksi 
-                SqlDataReader reader = com.ExecuteReader(); // menampilkan data query 
+                string sql = "select ID_reservasi, Nama_customer, No_telpon, " +
+                    "Jumlah_pemesanan, Nama_Lokasi from dbo.Pemesanan p join dbo.Lokasi l on p.ID_lokasi = l.ID_lokasi";
+                connection = new SqlConnection(constring); // fungsi konek ke database 
+                com = new SqlCommand(sql, connection); //proses execute query 
+                connection.Open(); //membuka koneksi 
+                SqlDataReader reader = com.ExecuteReader();// menampilkan data query 
+
                 while (reader.Read())
                 {
                     /*nama class*/
@@ -156,7 +271,7 @@ namespace ServiceReservasi
                     pemesanans.Add(data); //mengumpulkan data yang awalnya dari array
                     
                 }
-                koneksi.Close(); //untuk menutup akses ke database
+                connection.Close(); //untuk menutup akses ke database
             }
             catch(Exception ex)
             {
