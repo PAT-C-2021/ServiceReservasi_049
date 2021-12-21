@@ -20,6 +20,7 @@ namespace ServiceReservasi
 		string UpdateRegister(string username, string password, string kategori, int id);
 		[OperationContract]
 		string DeleteRegister(string username);
+		[OperationContract]
 		List<DataRegister> DataRegist();
 
 		[OperationContract]
